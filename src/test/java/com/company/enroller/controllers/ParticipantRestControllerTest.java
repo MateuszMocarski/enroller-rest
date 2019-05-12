@@ -7,6 +7,7 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 import java.util.Collection;
 
@@ -22,6 +23,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.company.enroller.model.Participant;
 import com.company.enroller.persistence.MeetingService;
 import com.company.enroller.persistence.ParticipantService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(ParticipantRestController.class)
@@ -47,6 +49,20 @@ public class ParticipantRestControllerTest {
 
 		mvc.perform(get("/participants").contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 				.andExpect(jsonPath("$", hasSize(1))).andExpect(jsonPath("$[0].login", is(participant.getLogin())));
+	}
+
+	@Test
+	public void getParticipant() throws Exception {
+		Participant participant = new Participant();
+		participant.setLogin("testlogin");
+		participant.setPassword("testpassword");
+
+		Collection<Participant> participantSingleton = singletonList(participant);
+		given(participantService.getAll()).willReturn(participantSingleton);
+		
+		mvc.perform(get("/participants").contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+			.andExpect(jsonPath("$[0].login", is(participant.getLogin()))).andExpect(jsonPath("$[0].password", is(participant.getPassword())));
+
 	}
 
 }
